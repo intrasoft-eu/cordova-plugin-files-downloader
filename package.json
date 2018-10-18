@@ -1,0 +1,33 @@
+{
+  "name": "cordova-plugin-files-downloader",
+  "version": "0.0.1",
+  "description": "An Android Cordova plugin that allows you to download files using download manager.",
+  "cordova": {
+    "id": "cordova-plugin-files-downloader",
+    "platforms": [
+      "android"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/intrasoft-eu/cordova-plugin-files-downloader.git"
+  },
+  "keywords": [
+    "Files",
+    "Downloader",
+    "ecosystem:cordova",
+    "cordova-android"
+  ],
+  "engines": [
+    {
+      "name": "cordova",
+      "version": ">=3.0.0"
+    }
+  ],
+  "author": "Marek Nowakowski <info@intrasoft.eu>",
+  "license": "Apache 2.0 License",
+  "bugs": {
+    "url": "https://github.com/intrasoft-eu/cordova-plugin-files-downloader/issues"
+  },
+  "homepage": "https://github.com/intrasoft-eu/cordova-plugin-files-downloader/"
+}

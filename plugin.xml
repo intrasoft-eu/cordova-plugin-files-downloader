@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        id="cordova-plugin-files-downloader" version="0.0.1">
+    <name>FilesDownloaderPlugin</name>
+
+    <description>An Android Cordova plugin that allows you to download files using download manager.</description>
+    <license>Apache 2.0 License</license>
+
+    <keywords>cordova,android,download,downloader</keywords>
+    <repo>https://github.com/intrasoft-eu/cordova-plugin-files-downloader.git</repo>
+    <issue>https://github.com/intrasoft-eu/cordova-plugin-files-downloader/issues</issue>
+  
+    <engines>
+        <engine name="cordova" version=">=3.0.0"/>
+    </engines>
+  
+    <js-module src="www/FilesDownloader.js" name="FilesDownloader">
+        <clobbers target="FilesDownloader" />
+    </js-module>
+    <platform name="android">
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="FilesDownloader">
+                <param name="android-package" value="eu.intrasoft.cordova.filesdownloader.FilesDownloader"/>
+            </feature>
+        </config-file>
+
+        <config-file target="AndroidManifest.xml" parent="/*">
+            <uses-permission android:name="android.permission.INTERNET" />
+        </config-file>
+
+        <source-file src="src/android/FilesDownloader.java" target-dir="src/eu/intrasoft/cordova/filesdownloader" />
+		<source-file src="src/android/DownloadItem.java" target-dir="src/eu/intrasoft/cordova/filesdownloader" />
+		<source-file src="src/android/DownloadItemInfo.java" target-dir="src/eu/intrasoft/cordova/filesdownloader" />
+		<source-file src="src/android/DownloadException.java" target-dir="src/eu/intrasoft/cordova/filesdownloader" />
+		<source-file src="src/android/Utils.java" target-dir="src/eu/intrasoft/cordova/filesdownloader" />
+    </platform>
+</plugin>
