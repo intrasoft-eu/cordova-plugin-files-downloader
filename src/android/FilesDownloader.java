@@ -166,6 +166,8 @@ public class FilesDownloader extends CordovaPlugin {
                         }
 
                         item.sendResult(status, downloadInfo.getDownloadProgress());
+                    } else {
+                        checkDownloadItem(item, DownloadManager.STATUS_FAILED);
                     }
                 }
             }, UPDATE_INTERVAL);
