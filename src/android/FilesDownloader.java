@@ -357,6 +357,8 @@ public class FilesDownloader extends CordovaPlugin {
                                     throw new DownloadException(103, "Could not extract downloaded file.");
                                 }
 
+                                destinationFile.delete();
+
                                 downloadItem.sendResult(Utils.STATUS_FINISHED);
                             } catch (DownloadException e) {
                                 System.err.println("Exception: " + e.getMessage());
@@ -364,15 +366,11 @@ public class FilesDownloader extends CordovaPlugin {
                             } catch (Exception e) {
                                 System.err.println("Exception: " + e.getMessage());
                                 downloadItem.sendError("This download could not be processed.", 0, e);
+                            } finally {
+                                flushDownload(downloadItem);
                             }
                         }
                     });
-
-                    /*if (!Utils.extractZip(destinationFile.getParent(), destinationFile.getName())) {
-                        throw new Exception("Could not extract downloaded file." + destinationFile.getPath() + " / " + destinationFile.getName());
-                    }*/
-
-                    //destinationFile.delete();
                 } else {
                     downloadItem.sendResult(Utils.STATUS_FINISHED);
                 }
@@ -381,9 +379,11 @@ public class FilesDownloader extends CordovaPlugin {
                 downloadItem.sendError("This download could not be processed.", e.getCode(), e);
             } catch (Exception e) {
                 System.err.println("Exception: " + e.getMessage());
-                downloadItem.sendError("This download could not be processed.", 0, e);
+                downloadItem.sendError("This download could not be processed. ", 0, e);
             } finally {
-                this.flushDownload(downloadItem);
+                if (!downloadItem.isExtract()) {
+                    this.flushDownload(downloadItem);
+                }
             }
         } else if (status == DownloadManager.STATUS_FAILED) {
             this.flushDownload(downloadItem);
