@@ -387,9 +387,7 @@ public class FilesDownloader extends CordovaPlugin {
                 downloadItem.sendResult(Utils.STATUS_FAILED);
                 downloadItem.sendError("This download could not be processed. ", 0, e);
             } finally {
-                if (!downloadItem.isExtract()) {
-                    this.flushDownload(downloadItem);
-                }
+                this.flushDownload(downloadItem);
             }
         } else if (status == DownloadManager.STATUS_FAILED) {
             this.flushDownload(downloadItem);
