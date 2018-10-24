@@ -364,9 +364,11 @@ public class FilesDownloader extends CordovaPlugin {
                                 downloadItem.sendResult(Utils.STATUS_FINISHED);
                             } catch (DownloadException e) {
                                 System.err.println("Exception: " + e.getMessage());
+                                downloadItem.sendResult(Utils.STATUS_FAILED);
                                 downloadItem.sendError("This download could not be processed.", e.getCode(), e);
                             } catch (Exception e) {
                                 System.err.println("Exception: " + e.getMessage());
+                                downloadItem.sendResult(Utils.STATUS_FAILED);
                                 downloadItem.sendError("This download could not be processed.", 0, e);
                             } finally {
                                 flushDownload(downloadItem);
@@ -378,9 +380,11 @@ public class FilesDownloader extends CordovaPlugin {
                 }
             } catch (DownloadException e) {
                 System.err.println("Exception: " + e.getMessage());
+                downloadItem.sendResult(Utils.STATUS_FAILED);
                 downloadItem.sendError("This download could not be processed.", e.getCode(), e);
             } catch (Exception e) {
                 System.err.println("Exception: " + e.getMessage());
+                downloadItem.sendResult(Utils.STATUS_FAILED);
                 downloadItem.sendError("This download could not be processed. ", 0, e);
             } finally {
                 if (!downloadItem.isExtract()) {
