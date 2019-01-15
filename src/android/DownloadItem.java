@@ -22,6 +22,7 @@ package eu.intrasoft.cordova.filesdownloader;
 import android.app.DownloadManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Environment;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.PluginResult;
@@ -29,6 +30,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -66,8 +68,19 @@ class DownloadItem {
         return destinationFileUrl;
     }
 
-    public String getTemporaryFileUrl() {
-        return this.getDestinationFileUrl().concat(".download");
+    /**
+     * Get temporary file url (in the downloads folder)
+     *
+     * @return String
+     * @throws IOException IO Error
+     */
+    public String getTemporaryFileUrl() throws IOException {
+        File downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+
+        String filename = this.getDestinationFileUrl().substring(this.getDestinationFileUrl().lastIndexOf("/") + 1);
+        File outputFile = new File(downloadDir, filename.concat(".download"));// File.createTempFile(filename, "download", outputDir);
+
+        return Uri.fromFile(outputFile).toString();
     }
 
     public String getTitle() {
@@ -99,7 +112,7 @@ class DownloadItem {
      *
      * @return DownloadManager.Request
      */
-    public DownloadManager.Request getNewRequest() {
+    public DownloadManager.Request getNewRequest() throws IOException {
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(this.getRemoteUrl()));
         request.setTitle(this.getTitle());
         request.setVisibleInDownloadsUi(false);

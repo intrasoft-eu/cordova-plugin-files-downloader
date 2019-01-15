@@ -20,6 +20,7 @@
 package eu.intrasoft.cordova.filesdownloader;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -337,16 +338,19 @@ public class FilesDownloader extends CordovaPlugin {
                     }
                 }
 
-                if (!temporaryFile.renameTo(destinationFile)) {
-                    throw new DownloadException(102, "Could not save downloaded file.");
-                }
-
-                if (downloadItem.isExtract()) {
-                    downloadItem.sendResult(Utils.STATUS_EXTRACTING);
-
-                    cordova.getThreadPool().execute(new Runnable() {
-                        public void run() {
+                cordova.getThreadPool().execute(new Runnable() {
+                    public void run() {
+                        try {
                             try {
+                                Utils.copyFile(temporaryFile, destinationFile);
+                            } catch (IOException e) {
+                                throw new DownloadException(102, "Could not save downloaded file.");
+                            }
+
+                            temporaryFile.delete();
+
+                            if (downloadItem.isExtract()) {
+                                downloadItem.sendResult(Utils.STATUS_EXTRACTING);
                                 boolean res = Utils.extractZip(
                                         destinationFile.getParent(),
                                         destinationFile.getName(),
@@ -362,22 +366,22 @@ public class FilesDownloader extends CordovaPlugin {
                                 destinationFile.delete();
 
                                 downloadItem.sendResult(Utils.STATUS_FINISHED);
-                            } catch (DownloadException e) {
-                                System.err.println("Exception: " + e.getMessage());
-                                downloadItem.sendResult(Utils.STATUS_FAILED);
-                                downloadItem.sendError("This download could not be processed.", e.getCode(), e);
-                            } catch (Exception e) {
-                                System.err.println("Exception: " + e.getMessage());
-                                downloadItem.sendResult(Utils.STATUS_FAILED);
-                                downloadItem.sendError("This download could not be processed.", 0, e);
-                            } finally {
-                                flushDownload(downloadItem);
+                            } else {
+                                downloadItem.sendResult(Utils.STATUS_FINISHED);
                             }
+                        } catch (DownloadException e) {
+                            System.err.println("Exception: " + e.getMessage());
+                            downloadItem.sendResult(Utils.STATUS_FAILED);
+                            downloadItem.sendError("This download could not be processed.", e.getCode(), e);
+                        } catch (Exception e) {
+                            System.err.println("Exception: " + e.getMessage());
+                            downloadItem.sendResult(Utils.STATUS_FAILED);
+                            downloadItem.sendError("This download could not be processed.", 0, e);
+                        } finally {
+                            flushDownload(downloadItem);
                         }
-                    });
-                } else {
-                    downloadItem.sendResult(Utils.STATUS_FINISHED);
-                }
+                    }
+                });
             } catch (DownloadException e) {
                 System.err.println("Exception: " + e.getMessage());
                 downloadItem.sendResult(Utils.STATUS_FAILED);

@@ -31,6 +31,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -57,7 +58,7 @@ final class Utils {
      */
     static DownloadItem getDownloadItem(String remoteUrl, String destinationFileUrl, CallbackContext callback) {
         return new DownloadItem(
-            remoteUrl,
+                remoteUrl,
                 destinationFileUrl,
                 callback
         );
@@ -195,5 +196,25 @@ final class Utils {
         }
 
         return true;
+    }
+
+    /**
+     * Copy given file
+     *
+     * @param src Source file
+     * @param dst Destination file
+     * @throws IOException IO Error
+     */
+    public static void copyFile(File src, File dst) throws IOException {
+        try (InputStream in = new FileInputStream(src)) {
+            try (OutputStream out = new FileOutputStream(dst)) {
+                // Transfer bytes from in to out
+                byte[] buf = new byte[1024];
+                int len;
+                while ((len = in.read(buf)) > 0) {
+                    out.write(buf, 0, len);
+                }
+            }
+        }
     }
 }
