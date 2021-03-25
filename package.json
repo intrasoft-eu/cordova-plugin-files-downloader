@@ -1,6 +1,6 @@
 {
   "name": "cordova-plugin-files-downloader",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "An Android Cordova plugin that allows you to download files using download manager.",
   "cordova": {
     "id": "cordova-plugin-files-downloader",
