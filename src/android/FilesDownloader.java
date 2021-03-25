@@ -326,73 +326,61 @@ public class FilesDownloader extends CordovaPlugin {
      */
     private void checkDownloadItem(DownloadItem downloadItem, int status) {
         if (status == DownloadManager.STATUS_SUCCESSFUL) {
-            try {
-                downloadItem.sendResult(Utils.STATUS_FINALIZING);
+            cordova.getThreadPool().execute(new Runnable() {
+                public void run() {
+                    try {
+                        downloadItem.sendResult(Utils.STATUS_FINALIZING);
 
-                File temporaryFile = new File(Uri.parse(downloadItem.getTemporaryFileUrl()).getPath());
-                File destinationFile = new File(Uri.parse(downloadItem.getDestinationFileUrl()).getPath());
+                        File temporaryFile = new File(Uri.parse(downloadItem.getTemporaryFileUrl()).getPath());
+                        File destinationFile = new File(Uri.parse(downloadItem.getDestinationFileUrl()).getPath());
 
-                if (destinationFile.exists()) {
-                    if (!destinationFile.delete()) {
-                        throw new DownloadException(101, "Could not remove destination file.");
+                        if (destinationFile.exists()) {
+                            if (!destinationFile.delete()) {
+                                throw new DownloadException(101, "Could not remove destination file.");
+                            }
+                        }
+
+                        try {
+                            Utils.copyFile(temporaryFile, destinationFile);
+                        } catch (IOException e) {
+                            throw new DownloadException(102, "Could not save downloaded file.");
+                        }
+
+                        temporaryFile.delete();
+
+                        if (downloadItem.isExtract()) {
+                            downloadItem.sendResult(Utils.STATUS_EXTRACTING);
+                            boolean res = Utils.extractZip(
+                                    destinationFile.getParent(),
+                                    destinationFile.getName(),
+                                    percentage -> {
+                                        downloadItem.sendResult(Utils.STATUS_EXTRACTING, percentage);
+                                    }
+                            );
+
+                            if (!res) {
+                                throw new DownloadException(103, "Could not extract downloaded file.");
+                            }
+
+                            destinationFile.delete();
+
+                            downloadItem.sendResult(Utils.STATUS_FINISHED);
+                        } else {
+                            downloadItem.sendResult(Utils.STATUS_FINISHED);
+                        }
+                    } catch (DownloadException e) {
+                        System.err.println("Exception: " + e.getMessage());
+                        downloadItem.sendResult(Utils.STATUS_FAILED);
+                        downloadItem.sendError("This download could not be processed.", e.getCode(), e);
+                    } catch (Exception e) {
+                        System.err.println("Exception: " + e.getMessage());
+                        downloadItem.sendResult(Utils.STATUS_FAILED);
+                        downloadItem.sendError("This download could not be processed.", 0, e);
+                    } finally {
+                        flushDownload(downloadItem);
                     }
                 }
-
-                cordova.getThreadPool().execute(new Runnable() {
-                    public void run() {
-                        try {
-                            try {
-                                Utils.copyFile(temporaryFile, destinationFile);
-                            } catch (IOException e) {
-                                throw new DownloadException(102, "Could not save downloaded file.");
-                            }
-
-                            temporaryFile.delete();
-
-                            if (downloadItem.isExtract()) {
-                                downloadItem.sendResult(Utils.STATUS_EXTRACTING);
-                                boolean res = Utils.extractZip(
-                                        destinationFile.getParent(),
-                                        destinationFile.getName(),
-                                        percentage -> {
-                                            downloadItem.sendResult(Utils.STATUS_EXTRACTING, percentage);
-                                        }
-                                );
-
-                                if (!res) {
-                                    throw new DownloadException(103, "Could not extract downloaded file.");
-                                }
-
-                                destinationFile.delete();
-
-                                downloadItem.sendResult(Utils.STATUS_FINISHED);
-                            } else {
-                                downloadItem.sendResult(Utils.STATUS_FINISHED);
-                            }
-                        } catch (DownloadException e) {
-                            System.err.println("Exception: " + e.getMessage());
-                            downloadItem.sendResult(Utils.STATUS_FAILED);
-                            downloadItem.sendError("This download could not be processed.", e.getCode(), e);
-                        } catch (Exception e) {
-                            System.err.println("Exception: " + e.getMessage());
-                            downloadItem.sendResult(Utils.STATUS_FAILED);
-                            downloadItem.sendError("This download could not be processed.", 0, e);
-                        } finally {
-                            flushDownload(downloadItem);
-                        }
-                    }
-                });
-            } catch (DownloadException e) {
-                System.err.println("Exception: " + e.getMessage());
-                downloadItem.sendResult(Utils.STATUS_FAILED);
-                downloadItem.sendError("This download could not be processed.", e.getCode(), e);
-            } catch (Exception e) {
-                System.err.println("Exception: " + e.getMessage());
-                downloadItem.sendResult(Utils.STATUS_FAILED);
-                downloadItem.sendError("This download could not be processed. ", 0, e);
-            } finally {
-                this.flushDownload(downloadItem);
-            }
+            });
         } else if (status == DownloadManager.STATUS_FAILED) {
             this.flushDownload(downloadItem);
             downloadItem.sendResult(Utils.STATUS_CANCELLED);
